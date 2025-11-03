@@ -9,7 +9,14 @@ namespace BusinessLayer.Contracts
 {
     public interface ICategoryManager
     {
-        List<GetAllCategoriesDto> GetAllCategories();
+        Task<List<GetAllCategoriesDto>> GetAllCategories();
+        Task<GetCategoryByIdDTO> GetCategoryById(int id);
+
+        Task AddCategory(AddCategoryDTO category);
+
+        Task UpdateCategory (UpdateCategoryDTO category);
+
+        Task DeleteCategory(int id);
 
         
     }

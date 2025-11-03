@@ -8,10 +8,15 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.Repositries.Generic
 {
-    public class GenericRepo<T> (ApplicationDbContext context):IGenericRepo<T>
+    public class GenericRepo<T>:IGenericRepo<T>
         where T : class
     {
         private readonly ApplicationDbContext _context;
+
+        public GenericRepo(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
         public  async Task<IEnumerable<T>> GetAll(Func<IQueryable<T>, IQueryable<T>>? include = null)
         {

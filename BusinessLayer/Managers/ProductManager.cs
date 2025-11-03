@@ -41,7 +41,7 @@ namespace BusinessLayer.Managers
         {
             var product = await _unitOfWork.Products.GetById(id);
             if (product != null) {
-                _unitOfWork.Products.Delete(id);
+               await _unitOfWork.Products.Delete(id);
                 await _unitOfWork.CompleteAsync();
             }
         }

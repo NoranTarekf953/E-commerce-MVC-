@@ -11,7 +11,7 @@ namespace BusinessLayer.DTOs.Catogries
 {
     public class GetAllCategoriesDto
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
@@ -53,10 +53,20 @@ namespace BusinessLayer.DTOs.Catogries
 
         public string ImageUrl { get; set; } = string.Empty;
 
-        public ICollection<AddProductDTO> Products { get; set; } = new HashSet<AddProductDTO>();
+        //public ICollection<AddProductDTO> Products { get; set; } = new HashSet<AddProductDTO>();
 
 
     }
+
+    public class UpdateCategoryDTO {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; } = string.Empty;
+
+
+        public string ImageUrl { get; set; } = string.Empty;
+    }
+
 
 
 

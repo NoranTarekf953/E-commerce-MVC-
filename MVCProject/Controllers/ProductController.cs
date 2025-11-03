@@ -12,35 +12,49 @@ namespace PresentationLayer.Controllers
         {
             _productManager = productManager;
         }
-        public async Task<IActionResult> GetAllProduct()
+
+        public async Task<IActionResult> ShowAllProducts()
         {
-            var products = await  _productManager.GetAll();
-            //var getProducts = products.Select( async p => new AllProducts
-            // {
-            //     Name = p.Name,
-            //     Description = p.Description,
-            //     Price = p.Price,
-            //     Discount = p.Discount,
-            //     StockQuantity = p.StockQuantity,
-            //     Images =await  _productManager.GetProductImages(p.Id)
-            //}).ToList();
-            // var res = await Task.WhenAll(getProducts).ContinueWith(t => t.Result.ToList());
-
-            var getProducts = new List<AllProducts>();
-
-   
-
-            //        Name = p.Name,
-            //        Description = p.Description,
-            //        Price = p.Price,
-            //        Discount = p.Discount,
-            //        StockQuantity = p.StockQuantity,
-            //        Images = images
-            //    });
-            //}
-            return View( getProducts);
+            var products = await _productManager.GetAll();
+            return View(products);
         }
 
-        
+        public async Task<IActionResult> ShowOneProduct(int id)
+        {
+            var product = await _productManager.GetProductById(id);
+            return View(product);
+        }
+        //public async Task<IActionResult> GetAllProduct()
+        //{
+        //    var products = await  _productManager.GetAll();
+        //    //var getProducts = products.Select( async p => new AllProducts
+        //    // {
+        //    //     Name = p.Name,
+        //    //     Description = p.Description,
+        //    //     Price = p.Price,
+        //    //     Discount = p.Discount,
+        //    //     StockQuantity = p.StockQuantity,
+        //    //     Images =await  _productManager.GetProductImages(p.Id)
+        //    //}).ToList();
+        //    // var res = await Task.WhenAll(getProducts).ContinueWith(t => t.Result.ToList());
+
+        //    var getProducts = new List<AllProducts>();
+
+
+
+        //    //        Name = p.Name,
+        //    //        Description = p.Description,
+        //    //        Price = p.Price,
+        //    //        Discount = p.Discount,
+        //    //        StockQuantity = p.StockQuantity,
+        //    //        Images = images
+        //    //    });
+        //    //}
+        //    return View( getProducts);
+        //}
+
+
+
+
     }
 }

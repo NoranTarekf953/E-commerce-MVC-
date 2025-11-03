@@ -18,7 +18,7 @@ namespace BusinessLayer.Extensions
             Price = dto.Price,
             StockQuantity = dto.StockQuantity,
             Discount = dto.Discount,
-            Description = dto.Description,
+            //Description = dto.d,
             ProductImages = dto.Images
         };
 
@@ -31,7 +31,7 @@ namespace BusinessLayer.Extensions
                 Price = entity.Price,
                 StockQuantity = entity.StockQuantity,
                 Discount = entity.Discount,
-                Description = entity.Description,
+                //Description = entity.Description,
                 Images = entity.ProductImages
 
             };
