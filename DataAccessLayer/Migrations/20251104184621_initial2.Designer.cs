@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251018111235_edit")]
-    partial class edit
+    [Migration("20251104184621_initial2")]
+    partial class initial2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,7 +58,7 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Addresses");
                 });
 
-            modelBuilder.Entity("DataAccessLayer.Entities.Account.Customer", b =>
+            modelBuilder.Entity("DataAccessLayer.Entities.Account.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -70,13 +70,20 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -92,10 +99,12 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -106,9 +115,6 @@ namespace DataAccessLayer.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Points")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -116,11 +122,24 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customer");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator().HasValue("ApplicationUser");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("DataAccessLayer.Entities.Cart", b =>
@@ -139,8 +158,6 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
-
                     b.ToTable("Carts");
                 });
 
@@ -158,8 +175,8 @@ namespace DataAccessLayer.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -179,9 +196,7 @@ namespace DataAccessLayer.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -200,32 +215,6 @@ namespace DataAccessLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateAt = new DateTime(2025, 10, 18, 14, 12, 31, 476, DateTimeKind.Local).AddTicks(2572),
-                            Description = "Devices and gadgets including phones, laptops, and accessories.",
-                            ImageUrl = "https://example.com/images/categories/electronics.jpg",
-                            Name = "Electronics"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreateAt = new DateTime(2025, 10, 18, 14, 12, 31, 476, DateTimeKind.Local).AddTicks(3189),
-                            Description = "Clothing, shoes, and accessories for all genders.",
-                            ImageUrl = "https://example.com/images/categories/fashion.jpg",
-                            Name = "Fashion"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreateAt = new DateTime(2025, 10, 18, 14, 12, 31, 476, DateTimeKind.Local).AddTicks(3198),
-                            Description = "Wide range of educational and entertainment books.",
-                            ImageUrl = "https://example.com/images/categories/books.jpg",
-                            Name = "Books"
-                        });
                 });
 
             modelBuilder.Entity("DataAccessLayer.Entities.Order", b =>
@@ -245,17 +234,15 @@ namespace DataAccessLayer.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
 
                     b.Property<string>("ShippingAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
@@ -329,58 +316,10 @@ namespace DataAccessLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderId")
+                        .IsUnique();
 
                     b.ToTable("Payment");
-                });
-
-            modelBuilder.Entity("DataAccessLayer.Entities.ProductImages", b =>
-                {
-                    b.Property<int>("ImageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ImageId"));
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ImageId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductImages");
-
-                    b.HasData(
-                        new
-                        {
-                            ImageId = 1,
-                            ImageUrl = "https://example.com/images/products/iphone15pro-1.jpg",
-                            ProductId = 1
-                        },
-                        new
-                        {
-                            ImageId = 2,
-                            ImageUrl = "https://example.com/images/products/iphone15pro-2.jpg",
-                            ProductId = 1
-                        },
-                        new
-                        {
-                            ImageId = 3,
-                            ImageUrl = "https://example.com/images/products/leatherjacket-1.jpg",
-                            ProductId = 2
-                        },
-                        new
-                        {
-                            ImageId = 4,
-                            ImageUrl = "https://example.com/images/products/pragmaticprogrammer-1.jpg",
-                            ProductId = 3
-                        });
                 });
 
             modelBuilder.Entity("DataAccessLayer.Entities.Products", b =>
@@ -396,8 +335,7 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Discount")
                         .HasPrecision(18, 2)
@@ -405,12 +343,15 @@ namespace DataAccessLayer.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductImages")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
@@ -420,44 +361,15 @@ namespace DataAccessLayer.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CategoryId = 1,
-                            Description = "Latest Apple smartphone with advanced features.",
-                            Discount = 2000m,
-                            Name = "iPhone 15 Pro",
-                            Price = 45000m,
-                            StockQuantity = 20
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CategoryId = 2,
-                            Description = "Stylish black leather jacket for men.",
-                            Discount = 200m,
-                            Name = "Men’s Leather Jacket",
-                            Price = 2500m,
-                            StockQuantity = 50
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CategoryId = 3,
-                            Description = "Classic book for software developers.",
-                            Discount = 50m,
-                            Name = "The Pragmatic Programmer",
-                            Price = 600m,
-                            StockQuantity = 120
-                        });
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -481,7 +393,7 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -495,9 +407,8 @@ namespace DataAccessLayer.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -506,72 +417,7 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -585,9 +431,8 @@ namespace DataAccessLayer.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -596,22 +441,19 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -620,13 +462,13 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -635,18 +477,16 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -656,21 +496,27 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("DataAccessLayer.Entities.Account.Customer", b =>
+                {
+                    b.HasBaseType("DataAccessLayer.Entities.Account.ApplicationUser");
+
+                    b.Property<int>("CartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.HasIndex("CartId")
+                        .IsUnique()
+                        .HasFilter("[CartId] IS NOT NULL");
+
+                    b.HasDiscriminator().HasValue("Customer");
+                });
+
             modelBuilder.Entity("DataAccessLayer.Entities.Account.Addresses", b =>
                 {
                     b.HasOne("DataAccessLayer.Entities.Account.Customer", "Customer")
                         .WithMany("Addresss")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("DataAccessLayer.Entities.Cart", b =>
-                {
-                    b.HasOne("DataAccessLayer.Entities.Account.Customer", "Customer")
-                        .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -700,7 +546,7 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("DataAccessLayer.Entities.Order", b =>
                 {
                     b.HasOne("DataAccessLayer.Entities.Account.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -730,23 +576,12 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("DataAccessLayer.Entities.Payment", b =>
                 {
                     b.HasOne("DataAccessLayer.Entities.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
+                        .WithOne("Payment")
+                        .HasForeignKey("DataAccessLayer.Entities.Payment", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("DataAccessLayer.Entities.ProductImages", b =>
-                {
-                    b.HasOne("DataAccessLayer.Entities.Products", "Product")
-                        .WithMany("ProductImages")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("DataAccessLayer.Entities.Products", b =>
@@ -760,51 +595,51 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("DataAccessLayer.Entities.Account.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("DataAccessLayer.Entities.Account.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("DataAccessLayer.Entities.Account.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("DataAccessLayer.Entities.Account.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -813,11 +648,20 @@ namespace DataAccessLayer.Migrations
 
             modelBuilder.Entity("DataAccessLayer.Entities.Account.Customer", b =>
                 {
-                    b.Navigation("Addresss");
+                    b.HasOne("DataAccessLayer.Entities.Cart", "Cart")
+                        .WithOne("Customer")
+                        .HasForeignKey("DataAccessLayer.Entities.Account.Customer", "CartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
                 });
 
             modelBuilder.Entity("DataAccessLayer.Entities.Cart", b =>
                 {
+                    b.Navigation("Customer")
+                        .IsRequired();
+
                     b.Navigation("Items");
                 });
 
@@ -829,6 +673,8 @@ namespace DataAccessLayer.Migrations
             modelBuilder.Entity("DataAccessLayer.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("DataAccessLayer.Entities.Products", b =>
@@ -836,8 +682,13 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("CartItems");
 
                     b.Navigation("OrderItems");
+                });
 
-                    b.Navigation("ProductImages");
+            modelBuilder.Entity("DataAccessLayer.Entities.Account.Customer", b =>
+                {
+                    b.Navigation("Addresss");
+
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

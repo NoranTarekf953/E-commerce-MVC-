@@ -1,6 +1,7 @@
 using BusinessLayer.Contracts;
 using BusinessLayer.Managers;
 using DataAccessLayer.Context;
+using DataAccessLayer.Entities.Account;
 using DataAccessLayer.Repositries.Category;
 using DataAccessLayer.Repositries.CategoryRepo;
 using DataAccessLayer.Repositries.Generic;
@@ -20,22 +21,31 @@ namespace MVCProject
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IProductRepositries, ProductRepositries>();
             builder.Services.AddScoped<IProductManager, ProductManager>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ICategoryRepositries, CategoryRepositries>();
             builder.Services.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
 
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(connectionString)
-                .LogTo(Console.WriteLine, LogLevel.Information);
+                options.UseSqlServer(connectionString);
+                //.LogTo(Console.WriteLine, LogLevel.Information);
             }
             );
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddIdentity<ApplicationUser,IdentityRole<int>>
+                (options => {
+                    options.SignIn.RequireConfirmedAccount = true;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 6; 
+                    })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
@@ -63,8 +73,8 @@ namespace MVCProject
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
-            app.MapRazorPages()
-               .WithStaticAssets();
+            //app.MapRazorPages()
+            //   .WithStaticAssets();
 
             app.Run();
         }

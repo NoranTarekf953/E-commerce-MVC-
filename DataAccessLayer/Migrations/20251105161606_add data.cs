@@ -5,7 +5,7 @@
 namespace DataAccessLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class init4 : Migration
+    public partial class adddata : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
